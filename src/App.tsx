@@ -1,25 +1,77 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useEffect, useState } from 'react';
+import {  Routes, Route } from 'react-router-dom';
 import './App.css';
+import { Auth } from './pages/auth';
+import { Home } from './pages/home';
+
+import { NotFound } from './pages/notFound';
+import Header from './components/header';
+import { Container } from '@mui/material';
+import axios from 'axios';
+
 
 function App() {
+
+ const [user, setUser]  =  useState(JSON.parse(localStorage.getItem('user') ||  '{}'));
+
+
+
+  useEffect(() => {
+
+
+    checkAuth();
+
+    if (!user.name  && window.location.pathname != '/auth') {
+      window.location.href = "/auth";
+  
+    } 
+
+    
+
+    if(user.name  && window.location.pathname == '/auth') {
+
+      window.location.href = "/";
+    }
+  }, [])
+
+
+
+  const checkAuth = async() => {
+  
+    try {
+      const data = await axios.get(process.env.REACT_APP_API_URL+'/users/me', {
+        headers: { Authorization: `Bearer ${user?.token}` }
+      });
+  
+    } catch(e) {
+      // localStorage.clear()
+    }
+  }
+
+
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+
+
+    <div>
+      <Header />
+      <Container maxWidth="lg" sx={{
+        marginTop: '20px'
+      }}>
+        <Routes>
+
+          <Route path='/auth' element={<Auth />} />
+
+          <Route path='/' element={<Home />} />
+
+
+
+          <Route path="*" element={<NotFound />} />
+
+        </Routes>
+      </Container>
     </div>
+
   );
 }
 
